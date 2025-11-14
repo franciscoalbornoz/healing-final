@@ -43,6 +43,7 @@ android {
 
 dependencies {
 
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,13 +61,15 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
-
+    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.core:core-ktx:1.13.1")
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation("androidx.work:work-runtime-ktx:2.9.0")
-
+    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
 }

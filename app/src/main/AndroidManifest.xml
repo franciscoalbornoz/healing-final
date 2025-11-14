@@ -3,7 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Android 13+: permiso notificaciones -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
 
     <application
@@ -16,6 +21,19 @@
         android:roundIcon="@drawable/logo_healing"
         android:supportsRtl="true"
         android:theme="@style/Theme.Healing">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+
+
 
         <!-- Activity principal -->
         <activity
