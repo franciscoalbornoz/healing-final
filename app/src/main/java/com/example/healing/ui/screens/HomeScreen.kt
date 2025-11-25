@@ -46,19 +46,17 @@ fun HomeScreen(
     navController: NavController,
     vm: HomeViewModel = viewModel()
 ) {
-    // Colores
-    val bg = Color(0xFF92BEAB)
-    val headline = Color(0xFF2E235E)
-    val chip = Color(0xFF626699)
-    val chipSelected = Color(0xFF4C507F)   // activo
-    val barTrack = Color(0xFF7E79B6)
-    val barFill = Color(0xFF2E235E)
+    val bg = Color(0xFFA17CEE)          // fondo lila
+    val headline = Color(0xFF2F143D)    // título "Mi Agenda" / "Healing"
+    val chip = Color(0xFFC99AFD)        // chips normal
+    val chipSelected = Color(0xFFA17CEE) // chip seleccionado
+    val barTrack = Color(0xFFB38BFF)    // barra de progreso (track)
+    val barFill = Color(0xFF8A5BFF)     // barra llena
 
     // Prefs para persistencia
     val context = LocalContext.current
     val prefs = remember { Prefs(context) }
     val scope = rememberCoroutineScope()
-
 
     LaunchedEffect(Unit) {
         prefs.selectedHabitsFlow.collect { saved ->
@@ -78,7 +76,6 @@ fun HomeScreen(
     val timeText = remember(now) { now.format(DateTimeFormatter.ofPattern("h:mm a", locale)) }
     val dateText = remember(now) { now.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMM", locale)) }
 
-
     val selectedState by vm.selected.collectAsState()
     val targetProgress = selectedState.size / vm.habits.size.toFloat()
     val progress by animateFloatAsState(targetValue = targetProgress, label = "progressAnim")
@@ -90,7 +87,6 @@ fun HomeScreen(
     ) {
 
         val screenW = maxWidth
-
         val baseWidth = 360.dp
         val scale = (screenW / baseWidth).coerceIn(0.7f, 1.15f)
 
@@ -191,8 +187,7 @@ fun HomeScreen(
                 onToggle = { id ->
                     vm.toggleHabit(id)
                     scope.launch { prefs.setSelectedHabits(vm.selected.value) } // guarda selección
-                }
-                ,
+                },
                 scale = scale
             )
 
@@ -206,7 +201,6 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height((16.dp * scale)))
 
-
             ToolsGrid(
                 navController = navController,
                 chip = chip,
@@ -214,8 +208,6 @@ fun HomeScreen(
                 onClick = { /* sin acción por ahora */ }
             )
         }
-
-
     }
 }
 
@@ -255,14 +247,12 @@ private fun HabitItem(
     iconRes: Int,
     selected: Set<String>,
     chip: Color,
-    chipSelected: Color, // no se usa ya
-    onToggle: (String) -> Unit
-    ,
+    chipSelected: Color,
+    onToggle: (String) -> Unit,
     scale: Float
 ) {
     val scaleF = scale.coerceAtLeast(0.7f)
     val isSelected = id in selected
-
 
     val pulse = rememberInfiniteTransition(label = "glowPulse").animateFloat(
         initialValue = 1.0f,
@@ -282,7 +272,6 @@ private fun HabitItem(
                 .drawBehind {
                     if (isSelected) {
                         val rBase = size.minDimension / 2f
-
                         val r = rBase * 0.9f * pulse.value
                         drawCircle(
                             color = Color.White.copy(alpha = 0.45f),
@@ -296,7 +285,6 @@ private fun HabitItem(
                 },
             contentAlignment = Alignment.Center
         ) {
-            // círculo base (mismo color siempre)
             Box(
                 modifier = Modifier
                     .size((78.dp * scaleF))
@@ -325,7 +313,7 @@ private fun HabitItem(
 
 @Composable
 private fun ToolsGrid(
-    navController: NavController,  // Aseguramos que navController se pase aquí
+    navController: NavController,
     chip: Color,
     scale: Float,
     onClick: () -> Unit
@@ -340,7 +328,7 @@ private fun ToolsGrid(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy((18.dp * scale), Alignment.CenterHorizontally)
         ) {
-            ToolButton(items[0], chip, scale = scale, onClick = { navController.navigate(Route.Notes.route) }) // Notas
+            ToolButton(items[0], chip, scale = scale, onClick = { navController.navigate(Route.Notes.route) })
             ToolButton(items[1], chip, scale = scale, onClick = { navController.navigate(Route.FoodPlan.route) })
         }
         Row(
@@ -349,7 +337,7 @@ private fun ToolsGrid(
         ) {
 
             ToolButton(items[2], chip, scale = scale, onClick = { navController.navigate(Route.EmergencyContact.route) })
-            ToolButton(items[3], chip, scale = scale, onClick = { navController.navigate(Route.Personal.route) }) // ← aquí
+            ToolButton(items[3], chip, scale = scale, onClick = { navController.navigate(Route.Personal.route) })
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -372,7 +360,13 @@ private fun ToolButton(text: String, chip: Color, scale: Float = 1f, onClick: ()
             .clickable { onClick() }
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = text, color = Color.White, textAlign = TextAlign.Center, fontSize = ((14f * factor).sp))
+            // 👇 TEXTO FORZADO A NEGRO
+            Text(
+                text = text,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                fontSize = ((14f * factor).sp)
+            )
         }
     }
 }

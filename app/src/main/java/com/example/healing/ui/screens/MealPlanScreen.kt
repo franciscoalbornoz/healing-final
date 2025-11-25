@@ -31,9 +31,12 @@ import com.example.healing.viewmodel.MealPlanViewModel.Companion.meals
 
 @Composable
 fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
-    val bg = Color(0xFFA8D5BA)
-    val card = Color(0xFFD1D0FB)
-    val title = Color(0xFF2E235E)
+    // --- COLORES NUEVOS (Estilo Morado) ---
+    val bg = Color(0xFF9C82D6)       // Fondo principal morado
+    val card = Color(0xFFD1D0FB)     // Color de las tarjetitas de comida
+    val title = Color(0xFF2E235E)    // Color del texto (títulos)
+    val btnColor = Color(0xFF63918B) // Color verde para los botones (según foto)
+    // --------------------------------------
 
     val all by vm.allMeals.collectAsState()
     val context = LocalContext.current
@@ -45,7 +48,7 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bg)
+            .background(bg) // <--- Fondo Morado aplicado
             .padding(16.dp)
     ) {
         Text(
@@ -59,12 +62,14 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(
                 onClick = { showAdd = true },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF63918B))
+                colors = ButtonDefaults.buttonColors(containerColor = btnColor), // <--- Botón verde
+                shape = RoundedCornerShape(20.dp)
             ) { Text("Agregar Comida", color = Color.Black) }
 
             Button(
                 onClick = { showDelete = true },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF63918B))
+                colors = ButtonDefaults.buttonColors(containerColor = btnColor), // <--- Botón verde
+                shape = RoundedCornerShape(20.dp)
             ) { Text("Eliminar Comida", color = Color.Black) }
         }
 
@@ -74,13 +79,15 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
         days.forEach { (dow, labelDia) ->
             val dayInt = dowToInt(dow)
             val items = all.filter { it.dayOfWeek == dayInt }
+
+            // Solo pintamos el bloque si hay items (Lógica original)
             if (items.isNotEmpty()) {
                 DayBlock(
                     dia = labelDia,
                     dayInt = dayInt,
                     items = items,
-                    card = card,
-                    title = title,
+                    card = card,   // Pasamos el color morado claro
+                    title = title, // Pasamos el color oscuro
                     imageStore = imageStore
                 )
                 Spacer(Modifier.height(12.dp))
@@ -89,7 +96,7 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
 
         Spacer(Modifier.height(12.dp))
         TextButton(onClick = { navController.popBackStack() }) {
-            Text("Regresar", color = Color.DarkGray)
+            Text("Regresar", color = title)
         }
     }
 
@@ -125,59 +132,57 @@ private fun DayBlock(
     title: Color,
     imageStore: MealImageStore
 ) {
-    Surface(
-        color = Color(0xFF92BEAB),
-        shape = RoundedCornerShape(18.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(dia, color = title, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(6.dp))
+    // Aquí mantenemos tu lógica: Un bloque para el día, y dentro las cards individuales
+    Column(Modifier.fillMaxWidth()) {
+        Text(dia, color = title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
 
-            val map = items.associateBy { it.mealType }
+        val map = items.associateBy { it.mealType }
 
-            listOf("Desayuno", "Almuerzo", "Snack", "Cena").forEach { kind ->
-                val entry = map[kind]
-                val desc = entry?.description
+        // Iteramos los tipos, pero SOLO creamos Surface si existe descripción
+        listOf("Desayuno", "Almuerzo", "Snack", "Cena").forEach { kind ->
+            val entry = map[kind]
+            val desc = entry?.description
 
-                if (desc != null) {
-                    val imageUriStr = imageStore.getImage(dayInt, kind)
-                    val hasImage = imageUriStr != null
+            if (desc != null) {
+                val imageUriStr = imageStore.getImage(dayInt, kind)
+                val hasImage = imageUriStr != null
 
-                    Surface(
-                        color = card,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(Modifier.padding(10.dp)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(kind, color = title, fontWeight = FontWeight.SemiBold)
-                                Spacer(Modifier.width(10.dp))
-                                Text(desc, color = title)
-                            }
+                Surface(
+                    color = card, // <--- Color morado claro en la tarjeta individual
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(Modifier.padding(10.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(kind, color = title, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.width(10.dp))
+                            Text(desc, color = title)
+                        }
 
-                            if (hasImage) {
-                                Spacer(Modifier.height(6.dp))
-                                Image(
-                                    painter = rememberAsyncImagePainter(imageUriStr),
-                                    contentDescription = "Foto $kind",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(80.dp)
-                                        .clip(RoundedCornerShape(10.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
+                        if (hasImage) {
+                            Spacer(Modifier.height(6.dp))
+                            Image(
+                                painter = rememberAsyncImagePainter(imageUriStr),
+                                contentDescription = "Foto $kind",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(80.dp)
+                                    .clip(RoundedCornerShape(10.dp)),
+                                contentScale = ContentScale.Crop
+                            )
                         }
                     }
-                    Spacer(Modifier.height(6.dp))
                 }
+                Spacer(Modifier.height(6.dp)) // Espacio entre cards
             }
         }
     }
 }
+
+// --- El resto del código (AddMealDialog, DeleteMealDialog, etc) se mantiene igual ---
+// No he tocado nada de la lógica de los diálogos.
 
 @Composable
 private fun AddMealDialog(
@@ -355,7 +360,6 @@ private fun ExposedDropdownMenuBoxSample(
     }
 }
 
-// Helper para crear Uri para la cámara
 private fun createImageUri(context: Context): Uri? {
     val resolver = context.contentResolver
     val contentValues = ContentValues().apply {

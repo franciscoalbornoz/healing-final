@@ -20,15 +20,17 @@ import java.util.Locale
 
 @Composable
 fun MedicationCalendarScreen(navController: NavController, vm: MedicationViewModel) {
-    val bg = Color(0xFF92BEAB)
-    val title = Color(0xFF2E235E)
+    // --- Paleta de colores basada en la foto ---
+    val bg = Color(0xFF9C82D6)      // Fondo Púrpura principal
+    val title = Color(0xFF2E235E)   // Texto oscuro (Mi Agenda, Mes)
+    val buttonColor = Color(0xFF626699) // Color grisáceo/violeta para botón Salir
+    // -------------------------------------------
 
     var current by remember { mutableStateOf(YearMonth.now()) }
 
     val start = current.atDay(1).toEpochDay()
     val end = current.atEndOfMonth().toEpochDay()
 
-    // 👇 NUEVO: días del mes con medicamentos
     val medsThisMonth by remember(start, end) {
         vm.medsBetween(start, end)
     }.collectAsState(initial = emptyList())
@@ -40,12 +42,13 @@ fun MedicationCalendarScreen(navController: NavController, vm: MedicationViewMod
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bg)
+            .background(bg) // Fondo actualizado
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Mi Agenda", color = Color.White, fontWeight = FontWeight.SemiBold)
+            // Cambiado a color 'title' para que coincida con las otras pantallas púrpuras
+            Text("Mi Agenda", color = title, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(Modifier.height(8.dp))
@@ -58,14 +61,15 @@ fun MedicationCalendarScreen(navController: NavController, vm: MedicationViewMod
 
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            TextButton(onClick = { current = current.minusMonths(1) }) { Text("◀") }
-            TextButton(onClick = { current = current.plusMonths(1) }) { Text("▶") }
+            TextButton(onClick = { current = current.minusMonths(1) }) { Text("◀", color = title) }
+            TextButton(onClick = { current = current.plusMonths(1) }) { Text("▶", color = title) }
         }
 
         Spacer(Modifier.height(8.dp))
         val week = listOf("L","M","M","J","V","S","D")
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            week.forEach { Text(it, color = Color.White) }
+            // Días de la semana en blanco, como en la foto
+            week.forEach { Text(it, color = Color.White, fontWeight = FontWeight.Bold) }
         }
         Spacer(Modifier.height(6.dp))
 
@@ -88,7 +92,7 @@ fun MedicationCalendarScreen(navController: NavController, vm: MedicationViewMod
                             val epochDay = date.toEpochDay()
                             DayCell(
                                 day = d,
-                                hasMed = epochDay in daysWithMeds, // 👈 ahora pinta el punto
+                                hasMed = epochDay in daysWithMeds,
                                 onClick = {
                                     vm.selectDay(epochDay)
                                     navController.navigate(Route.MedEditor.create(epochDay))
@@ -102,24 +106,28 @@ fun MedicationCalendarScreen(navController: NavController, vm: MedicationViewMod
         }
 
         Spacer(Modifier.height(20.dp))
+
+        // Botón Salir con el color de la foto
         Button(
             onClick = { navController.popBackStack() },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF626699)),
-            shape = CircleShape
+            colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
+            shape = CircleShape,
+            modifier = Modifier.width(150.dp)
         ) { Text("Salir", color = Color.White) }
     }
 }
 
 @Composable
 private fun DayCell(day: Int, hasMed: Boolean, onClick: () -> Unit) {
-    val base = Color(0xFF027C68)
-    val blue = Color(0xFF3F51B5)
+    // Colores de las burbujas
+    val base = Color(0xFF5C5470)  // Gris oscuro para días normales (como en la foto)
+    val medColor = Color(0xFF0F2185) // Rojo para días con medicamentos (según leyenda de la foto)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .background(if (hasMed) blue else base, CircleShape)
+                .background(if (hasMed) medColor else base, CircleShape)
                 .clickable { onClick() },
             contentAlignment = Alignment.Center
         ) {

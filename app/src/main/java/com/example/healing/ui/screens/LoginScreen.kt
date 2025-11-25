@@ -42,7 +42,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF92BEAB)), // gris verdoso de fondo
+            .background(Color(0xFFCA9BFF)), // gris verdoso de fondo
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -55,7 +55,7 @@ fun LoginScreen(
             Text(
                 text = "Healing",
                 fontSize = 70.sp,
-                color = Color.White,
+                color = Color.Black,
                 fontWeight = FontWeight.Bold
             )
 
@@ -73,7 +73,7 @@ fun LoginScreen(
             Text(
                 text = "Iniciar Sesión",
                 fontSize = 28.sp,
-                color = Color.White,
+                color = Color.Black,
                 fontWeight = FontWeight.SemiBold
             )
 
@@ -148,7 +148,7 @@ fun LoginScreen(
 
             // Texto de registro
             TextButton(onClick = onRegister) {
-                Text("¿No tienes cuenta? Regístrate", color = Color.White)
+                Text("¿No tienes cuenta? Regístrate", color = Color.Black)
             }
         }
     }

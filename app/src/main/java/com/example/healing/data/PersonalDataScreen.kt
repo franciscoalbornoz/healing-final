@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PersonalDataScreen(navController: NavController) {
-    val bg = Color(0xFFA8D5BA)
+    val bg = Color(0xFFA17CEE)
     val card = Color(0xFFD1D0FB)
     val title = Color(0xFF2E235E)
 
@@ -87,7 +87,7 @@ fun PersonalDataScreen(navController: NavController) {
             Button(
                 onClick = { showEditor = true },
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF63918B))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5D4491))
             ) { Text("agregar informacion", color = Color.Black) }
         } else {
             Button(

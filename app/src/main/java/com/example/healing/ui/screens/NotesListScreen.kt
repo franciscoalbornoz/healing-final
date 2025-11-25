@@ -25,7 +25,7 @@ fun NotesListScreen(navController: NavController, vm: NotesViewModel) {
     var editNote: Note? by remember { mutableStateOf(null) }   // 👈 para editar
     var editText by remember { mutableStateOf("") }
 
-    val bg = Color(0xFFA8D5BA)
+    val bg = Color(0xFFCA9BFF)
     val card = Color(0xFFD1D0FB)
 
     Column(
@@ -68,7 +68,7 @@ fun NotesListScreen(navController: NavController, vm: NotesViewModel) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFA8D5BA), shape = RoundedCornerShape(16.dp)) // 👈 fondo verde menta
+                        .background(Color(0xFFCA9BFF), shape = RoundedCornerShape(16.dp)) // 👈 fondo verde menta
                         .padding(16.dp)
                 ) {
                     Text(
@@ -78,7 +78,7 @@ fun NotesListScreen(navController: NavController, vm: NotesViewModel) {
                     )
                 }
             },
-            containerColor = Color(0xFFA8D5BA) // 👈 también para todo el cuadro
+            containerColor = Color(0xFFB580FA) // 👈 también para todo el cuadro
         )
     }
 

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.healing.R
 import com.example.healing.viewmodel.NotesViewModel
-import com.example.healing.navigation.Route   // ← agregado
+import com.example.healing.navigation.Route
 
 @Composable
 fun NotesScreen(
@@ -30,11 +30,11 @@ fun NotesScreen(
 ) {
     var noteText by remember { mutableStateOf("") }
 
-    // Paleta usada en tu diseño
-    val backgroundColor = Color(0xFFA8D5BA)
-    val textBoxColor    = Color(0xFFD1D0FB)
-    val titleTextColor  = Color(0xFF2E235E)
-    val buttonColor     = Color(0xFF63918B)
+    // Nueva paleta de colores basada en tu diseño púrpura
+    val backgroundColor = Color(0xFF9C82D6) // Púrpura de fondo
+    val textBoxColor    = Color(0xFFD1D0FB) // Púrpura claro para la caja de texto
+    val titleTextColor  = Color(0xFF2E235E) // Color del título y texto
+    val buttonColor     = Color(0xFF7F6F99) // Púrpura más oscuro para los botones
 
     Column(
         modifier = Modifier
@@ -48,29 +48,27 @@ fun NotesScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Mi Agenda", fontSize = 16.sp, color = Color.DarkGray)
+            Text(text = "Mi Agenda", fontSize = 16.sp, color = titleTextColor)
             Text(
                 text = "14:20 p. m.\nJueves 25 de sept",
                 fontSize = 12.sp,
-                color = Color.DarkGray,
+                color = titleTextColor,
                 textAlign = TextAlign.End
             )
         }
 
         Spacer(Modifier.height(16.dp))
 
-
         Text(
             text = "Bienvenido a tu\nblock de notas",
             color = titleTextColor,
-            fontSize = 28.sp,              // más grande
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 30.sp,
             textAlign = TextAlign.Center
         )
 
         Spacer(Modifier.height(20.dp))
-
 
         Box(
             modifier = Modifier
@@ -96,10 +94,10 @@ fun NotesScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp),    // ¡más alto!
+                        .height(220.dp),
                     textStyle = LocalTextStyle.current.copy(
-                        color = Color(0xFF2E235E),
-                        fontSize = 18.sp    // texto más grande
+                        color = titleTextColor,
+                        fontSize = 18.sp
                     ),
                     decorationBox = { innerTextField ->
                         if (noteText.isEmpty()) {
@@ -143,7 +141,7 @@ fun NotesScreen(
         Spacer(Modifier.height(20.dp))
 
         TextButton(onClick = { navController.popBackStack() }) {
-            Text("Regresar", color = Color.DarkGray)
+            Text("Regresar", color = titleTextColor)
         }
     }
 }

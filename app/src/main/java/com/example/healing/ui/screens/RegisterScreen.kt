@@ -52,7 +52,7 @@ fun RegisterScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF92BEAB)),
+            .background(Color(0xFFCA9BFF)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -77,7 +77,7 @@ fun RegisterScreen(
                     Text(
                         text = "Crear cuenta",
                         fontSize = 24.sp,
-                        color = Color.White,
+                        color = Color.Black,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -155,12 +155,12 @@ fun RegisterScreen(
                     containerColor = Color.DarkGray,
                     disabledContainerColor = Color.DarkGray.copy(alpha = 0.4f)
                 )
-            ) { Text("Registrar", color = Color.White) }
+            ) { Text("Registrar", color = Color.Black) }
 
             Spacer(Modifier.height(12.dp))
 
             TextButton(onClick = onBackToLogin) {
-                Text("¿Ya tienes cuenta? Inicia sesión", color = Color.White)
+                Text("¿Ya tienes cuenta? Inicia sesión", color = Color.Black)
             }
         }
     }
