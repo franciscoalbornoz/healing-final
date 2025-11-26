@@ -1,5 +1,11 @@
 package com.example.healing.ui.screens
 
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,13 +22,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.healing.data.MealImageStore
 import com.example.healing.model.MealEntry
-// IMPORTANTE: Importación corregida
 import com.example.healing.model.ChatViewModel
 import com.example.healing.viewmodel.MealPlanViewModel
 import com.example.healing.viewmodel.MealPlanViewModel.Companion.days
@@ -46,7 +52,6 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
 
     // --- CHAT IA ---
     var showChat by remember { mutableStateOf(false) }
-    // Instancia correcta del ViewModel
     val chatViewModel = androidx.lifecycle.viewmodel.compose.viewModel<ChatViewModel>()
 
     Box(
@@ -136,8 +141,12 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
     if (showAdd) {
         AddMealDialog(
             onDismiss = { showAdd = false }
-        ) { dayInt, mealType, text ->
+        ) { dayInt, mealType, text, imageUri ->
             vm.setMeal(dayInt, mealType, text)
+            // Guardamos la imagen si el usuario seleccionó una
+            imageUri?.toString()?.let { uriStr ->
+                imageStore.saveImage(dayInt, mealType, uriStr)
+            }
             showAdd = false
         }
     }
@@ -207,11 +216,32 @@ private fun DayBlock(
 @Composable
 private fun AddMealDialog(
     onDismiss: () -> Unit,
-    onConfirm: (dayOfWeek: Int, mealType: String, text: String) -> Unit
+    onConfirm: (dayOfWeek: Int, mealType: String, text: String, imageUri: Uri?) -> Unit
 ) {
+    val context = LocalContext.current
     var dayIndex by remember { mutableStateOf(0) }
     var mealIndex by remember { mutableStateOf(0) }
     var text by remember { mutableStateOf("") }
+
+    // Variables para las fotos
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // 1. Launcher para la Galería (Este es el famoso "pickFromGallery")
+    val pickFromGallery = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) selectedImageUri = uri
+    }
+
+    // 2. Launcher para la Cámara
+    val pickFromCamera = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            selectedImageUri = tempCameraUri
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -222,24 +252,51 @@ private fun AddMealDialog(
                     label = "Día",
                     items = days.map { it.second },
                     selectedIndex = dayIndex,
-                    onSelected = { dayIndex = it }
+                    onSelected = { index: Int -> dayIndex = index }
                 )
                 ExposedDropdownMenuBoxSample(
                     label = "Tipo",
                     items = meals,
                     selectedIndex = mealIndex,
-                    onSelected = { mealIndex = it }
+                    onSelected = { index: Int -> mealIndex = index }
                 )
                 OutlinedTextField(
                     value = text, onValueChange = { text = it },
                     label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth()
                 )
+
+                // Mostrar imagen seleccionada si hay
+                selectedImageUri?.let {
+                    Image(
+                        painter = rememberAsyncImagePainter(it),
+                        contentDescription = "Imagen",
+                        modifier = Modifier.height(100.dp).clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                // Botones para fotos
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { pickFromGallery.launch("image/*") },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Galería") }
+
+                    OutlinedButton(
+                        onClick = {
+                            val uri = createImageUri(context)
+                            tempCameraUri = uri
+                            if (uri != null) pickFromCamera.launch(uri)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Cámara") }
+                }
             }
         },
         confirmButton = {
             TextButton(onClick = {
                 val dayInt = dowToInt(days[dayIndex].first)
-                onConfirm(dayInt, meals[mealIndex], text)
+                onConfirm(dayInt, meals[mealIndex], text, selectedImageUri)
             }) { Text("Guardar") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
@@ -263,13 +320,13 @@ private fun DeleteMealDialog(
                     label = "Día",
                     items = days.map { it.second },
                     selectedIndex = dayIndex,
-                    onSelected = { dayIndex = it }
+                    onSelected = { index: Int -> dayIndex = index }
                 )
                 ExposedDropdownMenuBoxSample(
                     label = "Tipo",
                     items = meals,
                     selectedIndex = mealIndex,
-                    onSelected = { mealIndex = it }
+                    onSelected = { index: Int -> mealIndex = index }
                 )
                 Text("Se borrará esta comida.")
             }
@@ -302,4 +359,14 @@ private fun ExposedDropdownMenuBoxSample(
             }
         }
     }
+}
+
+// Función auxiliar para crear la URI de la cámara
+private fun createImageUri(context: Context): Uri? {
+    val resolver = context.contentResolver
+    val cv = ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, "meal_${System.currentTimeMillis()}.jpg")
+        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+    }
+    return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv)
 }
