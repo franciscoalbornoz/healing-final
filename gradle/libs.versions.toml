@@ -12,6 +12,9 @@ lifecycle = "2.6.1"
 navigation = "2.7.3"
 room = "2.6.1"
 datastore = "1.1.1"
+# 👇 AGREGAR ESTA LÍNEA (Versión de Gemini)
+generativeai = "0.9.0"
+gemini = "0.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +38,10 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx     = { group = "androidx.room", name = "room-ktx",     version.ref = "room" }
 androidx-room-compiler= { group = "androidx.room", name = "room-compiler",version.ref = "room" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+gemini = { module = "com.google.ai.client.generativeai:generativeai", version = "0.9.0" }
+# 👇 AGREGAR ESTA LÍNEA (Definición de la librería)
+google-ai-client-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

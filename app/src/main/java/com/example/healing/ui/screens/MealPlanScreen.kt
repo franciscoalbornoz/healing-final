@@ -1,15 +1,13 @@
 package com.example.healing.ui.screens
 
-import android.content.ContentValues
-import android.content.Context
-import android.net.Uri
-import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +22,8 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.healing.data.MealImageStore
 import com.example.healing.model.MealEntry
+// IMPORTANTE: Importación corregida
+import com.example.healing.model.ChatViewModel
 import com.example.healing.viewmodel.MealPlanViewModel
 import com.example.healing.viewmodel.MealPlanViewModel.Companion.days
 import com.example.healing.viewmodel.MealPlanViewModel.Companion.dowToInt
@@ -31,12 +31,11 @@ import com.example.healing.viewmodel.MealPlanViewModel.Companion.meals
 
 @Composable
 fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
-    // --- COLORES NUEVOS (Estilo Morado) ---
-    val bg = Color(0xFF9C82D6)       // Fondo principal morado
-    val card = Color(0xFFD1D0FB)     // Color de las tarjetitas de comida
-    val title = Color(0xFF2E235E)    // Color del texto (títulos)
-    val btnColor = Color(0xFF63918B) // Color verde para los botones (según foto)
-    // --------------------------------------
+    // --- COLORES ---
+    val bg = Color(0xFF9C82D6)
+    val cardColor = Color(0xFFD1D0FB)
+    val titleColor = Color(0xFF2E235E)
+    val btnColor = Color(0xFF63918B)
 
     val all by vm.allMeals.collectAsState()
     val context = LocalContext.current
@@ -45,72 +44,100 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
     var showAdd by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
 
-    Column(
+    // --- CHAT IA ---
+    var showChat by remember { mutableStateOf(false) }
+    // Instancia correcta del ViewModel
+    val chatViewModel = androidx.lifecycle.viewmodel.compose.viewModel<ChatViewModel>()
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bg) // <--- Fondo Morado aplicado
-            .padding(16.dp)
+            .background(bg)
     ) {
-        Text(
-            "Plan Alimenticio",
-            color = title,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(Modifier.height(8.dp))
+        // --- CONTENIDO DE COMIDAS ---
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                "Plan Alimenticio",
+                color = titleColor,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(
-                onClick = { showAdd = true },
-                colors = ButtonDefaults.buttonColors(containerColor = btnColor), // <--- Botón verde
-                shape = RoundedCornerShape(20.dp)
-            ) { Text("Agregar Comida", color = Color.Black) }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(
+                    onClick = { showAdd = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = btnColor),
+                    shape = RoundedCornerShape(20.dp)
+                ) { Text("Agregar Comida", color = Color.Black) }
 
-            Button(
-                onClick = { showDelete = true },
-                colors = ButtonDefaults.buttonColors(containerColor = btnColor), // <--- Botón verde
-                shape = RoundedCornerShape(20.dp)
-            ) { Text("Eliminar Comida", color = Color.Black) }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        // Mostrar por días
-        days.forEach { (dow, labelDia) ->
-            val dayInt = dowToInt(dow)
-            val items = all.filter { it.dayOfWeek == dayInt }
-
-            // Solo pintamos el bloque si hay items (Lógica original)
-            if (items.isNotEmpty()) {
-                DayBlock(
-                    dia = labelDia,
-                    dayInt = dayInt,
-                    items = items,
-                    card = card,   // Pasamos el color morado claro
-                    title = title, // Pasamos el color oscuro
-                    imageStore = imageStore
-                )
-                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = { showDelete = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = btnColor),
+                    shape = RoundedCornerShape(20.dp)
+                ) { Text("Eliminar Comida", color = Color.Black) }
             }
+
+            Spacer(Modifier.height(16.dp))
+
+            days.forEach { (dow, labelDia) ->
+                val dayInt = dowToInt(dow)
+                val items = all.filter { it.dayOfWeek == dayInt }
+
+                if (items.isNotEmpty()) {
+                    DayBlock(
+                        dia = labelDia,
+                        dayInt = dayInt,
+                        items = items,
+                        card = cardColor,
+                        title = titleColor,
+                        imageStore = imageStore
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            TextButton(onClick = { navController.popBackStack() }) {
+                Text("Regresar", color = titleColor)
+            }
+            Spacer(Modifier.height(80.dp))
         }
 
-        Spacer(Modifier.height(12.dp))
-        TextButton(onClick = { navController.popBackStack() }) {
-            Text("Regresar", color = title)
+        // --- BOTÓN FLOTANTE ROBOT ---
+        FloatingActionButton(
+            onClick = { showChat = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp)
+                .size(70.dp),
+            containerColor = Color.White,
+            elevation = FloatingActionButtonDefaults.elevation(4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Face,
+                contentDescription = "Chat IA",
+                tint = titleColor,
+                modifier = Modifier.size(40.dp)
+            )
         }
+    }
+
+    // --- DIALOGOS ---
+
+    if (showChat) {
+        ChatBotDialog(onDismiss = { showChat = false }, viewModel = chatViewModel)
     }
 
     if (showAdd) {
         AddMealDialog(
             onDismiss = { showAdd = false }
-        ) { dayInt, mealType, text, imageUri ->
+        ) { dayInt, mealType, text ->
             vm.setMeal(dayInt, mealType, text)
-
-            // Guardar imagen si hay
-            imageUri?.toString()?.let { uriStr ->
-                imageStore.saveImage(dayInt, mealType, uriStr)
-            }
-
             showAdd = false
         }
     }
@@ -123,6 +150,8 @@ fun MealPlanScreen(navController: NavController, vm: MealPlanViewModel) {
     }
 }
 
+// --- COMPONENTES ---
+
 @Composable
 private fun DayBlock(
     dia: String,
@@ -132,13 +161,10 @@ private fun DayBlock(
     title: Color,
     imageStore: MealImageStore
 ) {
-    // Aquí mantenemos tu lógica: Un bloque para el día, y dentro las cards individuales
     Column(Modifier.fillMaxWidth()) {
         Text(dia, color = title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
-
         val map = items.associateBy { it.mealType }
 
-        // Iteramos los tipos, pero SOLO creamos Surface si existe descripción
         listOf("Desayuno", "Almuerzo", "Snack", "Cena").forEach { kind ->
             val entry = map[kind]
             val desc = entry?.description
@@ -148,19 +174,16 @@ private fun DayBlock(
                 val hasImage = imageUriStr != null
 
                 Surface(
-                    color = card, // <--- Color morado claro en la tarjeta individual
+                    color = card,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(Modifier.padding(10.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(kind, color = title, fontWeight = FontWeight.SemiBold)
                             Spacer(Modifier.width(10.dp))
                             Text(desc, color = title)
                         }
-
                         if (hasImage) {
                             Spacer(Modifier.height(6.dp))
                             Image(
@@ -168,51 +191,27 @@ private fun DayBlock(
                                 contentDescription = "Foto $kind",
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(80.dp)
+                                    .height(100.dp)
                                     .clip(RoundedCornerShape(10.dp)),
                                 contentScale = ContentScale.Crop
                             )
                         }
                     }
                 }
-                Spacer(Modifier.height(6.dp)) // Espacio entre cards
+                Spacer(Modifier.height(8.dp))
             }
         }
     }
 }
 
-// --- El resto del código (AddMealDialog, DeleteMealDialog, etc) se mantiene igual ---
-// No he tocado nada de la lógica de los diálogos.
-
 @Composable
 private fun AddMealDialog(
     onDismiss: () -> Unit,
-    onConfirm: (dayOfWeek: Int, mealType: String, text: String, imageUri: Uri?) -> Unit
+    onConfirm: (dayOfWeek: Int, mealType: String, text: String) -> Unit
 ) {
-    val context = LocalContext.current
-
-    var dayIndex by remember { mutableStateOf(0) }  // 0..6
+    var dayIndex by remember { mutableStateOf(0) }
     var mealIndex by remember { mutableStateOf(0) }
     var text by remember { mutableStateOf("") }
-
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
-
-    // Galería
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        if (uri != null) selectedImageUri = uri
-    }
-
-    // Cámara
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            selectedImageUri = tempCameraUri
-        }
-    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -232,58 +231,15 @@ private fun AddMealDialog(
                     onSelected = { mealIndex = it }
                 )
                 OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = { Text("Descripción") },
-                    singleLine = false,
-                    minLines = 2
+                    value = text, onValueChange = { text = it },
+                    label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth()
                 )
-
-                // Preview de imagen
-                selectedImageUri?.let { uri ->
-                    Spacer(Modifier.height(8.dp))
-                    Image(
-                        painter = rememberAsyncImagePainter(uri),
-                        contentDescription = "Imagen seleccionada",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .clip(RoundedCornerShape(16.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedButton(
-                        onClick = { galleryLauncher.launch("image/*") },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(20.dp)
-                    ) { Text("Galería") }
-
-                    OutlinedButton(
-                        onClick = {
-                            val uri = createImageUri(context)
-                            tempCameraUri = uri
-                            if (uri != null) {
-                                cameraLauncher.launch(uri)
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(20.dp)
-                    ) { Text("Cámara") }
-                }
             }
         },
         confirmButton = {
             TextButton(onClick = {
                 val dayInt = dowToInt(days[dayIndex].first)
-                onConfirm(dayInt, meals[mealIndex], text, selectedImageUri)
+                onConfirm(dayInt, meals[mealIndex], text)
             }) { Text("Guardar") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
@@ -315,7 +271,7 @@ private fun DeleteMealDialog(
                     selectedIndex = mealIndex,
                     onSelected = { mealIndex = it }
                 )
-                Text("Se eliminará la comida seleccionada de ese día.")
+                Text("Se borrará esta comida.")
             }
         },
         confirmButton = {
@@ -331,40 +287,19 @@ private fun DeleteMealDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExposedDropdownMenuBoxSample(
-    label: String,
-    items: List<String>,
-    selectedIndex: Int,
-    onSelected: (Int) -> Unit
+    label: String, items: List<String>, selectedIndex: Int, onSelected: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
         OutlinedTextField(
-            value = items[selectedIndex],
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
+            value = items[selectedIndex], onValueChange = {}, readOnly = true,
+            label = { Text(label) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor().fillMaxWidth()
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items.forEachIndexed { i, text ->
-                DropdownMenuItem(
-                    text = { Text(text) },
-                    onClick = { onSelected(i); expanded = false }
-                )
+                DropdownMenuItem(text = { Text(text) }, onClick = { onSelected(i); expanded = false })
             }
         }
     }
-}
-
-private fun createImageUri(context: Context): Uri? {
-    val resolver = context.contentResolver
-    val contentValues = ContentValues().apply {
-        put(MediaStore.Images.Media.DISPLAY_NAME, "meal_${System.currentTimeMillis()}.jpg")
-        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-    }
-    return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 }
