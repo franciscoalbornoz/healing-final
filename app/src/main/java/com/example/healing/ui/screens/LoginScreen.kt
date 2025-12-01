@@ -33,7 +33,7 @@ fun LoginScreen(
 ) {
     val state by vm.uiState.collectAsState()
 
-    // 👇 NUEVO: acceso a Prefs para validar usuario local
+
     val context = LocalContext.current
     val prefs = remember { Prefs(context) }
     val scope = rememberCoroutineScope()
@@ -42,7 +42,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFCA9BFF)), // gris verdoso de fondo
+            .background(Color(0xFF9B7CDA)), // gris verdoso de fondo
         contentAlignment = Alignment.Center
     ) {
         Column(

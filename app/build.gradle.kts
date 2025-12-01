@@ -74,7 +74,10 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation(libs.gemini)
-
-
-
+    testImplementation("junit:junit:4.13.2")
+    implementation(kotlin("test"))
+    testImplementation(libs.junit)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit4)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }

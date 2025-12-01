@@ -20,11 +20,11 @@ import java.util.Locale
 
 @Composable
 fun MedicationCalendarScreen(navController: NavController, vm: MedicationViewModel) {
-    // --- Paleta de colores basada en la foto ---
+
     val bg = Color(0xFF9C82D6)      // Fondo Púrpura principal
     val title = Color(0xFF2E235E)   // Texto oscuro (Mi Agenda, Mes)
     val buttonColor = Color(0xFF626699) // Color grisáceo/violeta para botón Salir
-    // -------------------------------------------
+
 
     var current by remember { mutableStateOf(YearMonth.now()) }
 

@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 
 class ChatViewModel : ViewModel() {
 
-    private val apiKey = "AIzaSyAU_c4DFyZJ_ckk1QBK2YLVy4Q169mmtVU"
+    private val apiKey = "AIzaSyBeHrJYhSPyyzHhFcxhrAkfGEVNAM4h_rg"
 
     private val generativeModel = GenerativeModel(
         modelName = "gemini-2.5-flash",

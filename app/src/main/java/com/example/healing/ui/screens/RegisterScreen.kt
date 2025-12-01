@@ -38,7 +38,7 @@ fun RegisterScreen(
 ) {
     val state by vm.uiState.collectAsState()
 
-    // 👇 NUEVO: acceso a Prefs para guardar usuario local
+
     val context = LocalContext.current
     val prefs = remember { Prefs(context) }
     val scope = rememberCoroutineScope()

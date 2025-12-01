@@ -361,7 +361,7 @@ private fun ExposedDropdownMenuBoxSample(
     }
 }
 
-// Función auxiliar para crear la URI de la cámara
+
 private fun createImageUri(context: Context): Uri? {
     val resolver = context.contentResolver
     val cv = ContentValues().apply {
@@ -369,4 +369,4 @@ private fun createImageUri(context: Context): Uri? {
         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
     }
     return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv)
-}
+} 

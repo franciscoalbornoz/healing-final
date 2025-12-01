@@ -1,12 +1,11 @@
 package com.example.healing.ui.screens
-import com.example.healing.navigation.Route
 
+import com.example.healing.navigation.Route
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.animation.core.animateFloatAsState
@@ -48,8 +47,12 @@ fun HomeScreen(
 ) {
     val bg = Color(0xFFA17CEE)          // fondo lila
     val headline = Color(0xFF2F143D)    // título "Mi Agenda" / "Healing"
-    val chip = Color(0xFFC99AFD)        // chips normal
-    val chipSelected = Color(0xFFA17CEE) // chip seleccionado
+    val chip = Color(0xFFC99AFD)        // chips normal (Herramientas)
+
+    // 👇 CAMBIO SOLICITADO: Color específico para el círculo del Tracker
+    val habitCircleColor = Color(0xFF626698)
+
+    val chipSelected = Color(0xFF626698) // chip seleccionado (mismo tono)
     val barTrack = Color(0xFFB38BFF)    // barra de progreso (track)
     val barFill = Color(0xFF8A5BFF)     // barra llena
 
@@ -182,11 +185,12 @@ fun HomeScreen(
                     R.drawable.ic_pasear_mascota
                 ),
                 selected = selectedState,
-                chip = chip,
+                // 👇 AQUÍ USAMOS EL NUEVO COLOR SOLO PARA LOS HÁBITOS
+                chip = habitCircleColor,
                 chipSelected = chipSelected,
                 onToggle = { id ->
                     vm.toggleHabit(id)
-                    scope.launch { prefs.setSelectedHabits(vm.selected.value) } // guarda selección
+                    scope.launch { prefs.setSelectedHabits(vm.selected.value) }
                 },
                 scale = scale
             )
@@ -203,6 +207,7 @@ fun HomeScreen(
 
             ToolsGrid(
                 navController = navController,
+                // 👇 LAS HERRAMIENTAS SIGUEN USANDO EL COLOR CLARO ORIGINAL
                 chip = chip,
                 scale = scale,
                 onClick = { /* sin acción por ahora */ }
@@ -360,7 +365,6 @@ private fun ToolButton(text: String, chip: Color, scale: Float = 1f, onClick: ()
             .clickable { onClick() }
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            // 👇 TEXTO FORZADO A NEGRO
             Text(
                 text = text,
                 color = Color.Black,
