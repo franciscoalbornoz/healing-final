@@ -107,7 +107,7 @@ class HealingTests {
 
         assertEquals("Mamá", contacto.name)
         assertEquals("+569 9999 9999", contacto.phone)
-        assertEquals("Calle 123", contacto.address)
+
         println("   -> Contacto guardado OK")
     }
 

@@ -194,15 +194,17 @@ private fun DayBlock(
                             Text(desc, color = title)
                         }
                         if (hasImage) {
-                            Spacer(Modifier.height(6.dp))
+                            Spacer(Modifier.height(8.dp))
+                            // 👇 AQUÍ HICE EL CAMBIO:
+                            // Aumenté de 100.dp a 200.dp para que la foto se vea grande y bien.
                             Image(
                                 painter = rememberAsyncImagePainter(imageUriStr),
                                 contentDescription = "Foto $kind",
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(100.dp)
+                                    .height(200.dp) // <--- ANTES ERA 100.dp (muy chico)
                                     .clip(RoundedCornerShape(10.dp)),
-                                contentScale = ContentScale.Crop
+                                contentScale = ContentScale.Crop // Recorta lo que sobra para llenar el cuadro
                             )
                         }
                     }
@@ -227,7 +229,7 @@ private fun AddMealDialog(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
-    // 1. Launcher para la Galería (Este es el famoso "pickFromGallery")
+    // 1. Launcher para la Galería
     val pickFromGallery = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -265,12 +267,15 @@ private fun AddMealDialog(
                     label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth()
                 )
 
-                // Mostrar imagen seleccionada si hay
+                // Mostrar imagen seleccionada si hay (También agrandada la previsualización)
                 selectedImageUri?.let {
                     Image(
                         painter = rememberAsyncImagePainter(it),
                         contentDescription = "Imagen",
-                        modifier = Modifier.height(100.dp).clip(RoundedCornerShape(8.dp)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp) // <--- ANTES ERA 100.dp
+                            .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop
                     )
                 }
@@ -369,4 +374,4 @@ private fun createImageUri(context: Context): Uri? {
         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
     }
     return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv)
-} 
+}
