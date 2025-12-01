@@ -53,13 +53,13 @@ class HealingTests {
         }
         println("")
 
-        if (vm.messages.size < 2) throw RuntimeException("❌ Timeout: Gemini no respondió.")
+        if (vm.messages.size < 2) throw RuntimeException(" Timeout: Gemini no respondió.")
 
         val respuesta = vm.messages[1]
         println("🟢 [GEMINI] Respuesta: ${respuesta.text}")
 
         if (respuesta.text.contains("API key was reported as leaked")) {
-            throw RuntimeException("⛔ ERROR: API Key bloqueada.")
+            throw RuntimeException(" ERROR: API Key bloqueada.")
         }
 
         assertTrue(respuesta.text.isNotBlank())
@@ -141,15 +141,15 @@ class HealingTests {
     fun `recordatorio de medicamento tiene datos validos para notificar`() {
         println("🔵 [MEDICAMENTOS] Validando integridad para notificación...")
 
-        // Simulamos los datos que usaría tu sistema de notificaciones
+
         val nombreMedicamento = "Ibuprofeno"
         val dosis = "400mg"
         val horaProgramada = "08:30" // Formato HH:MM
 
-        // 1. Validar que tenga nombre
+
         assertTrue("El nombre es obligatorio", nombreMedicamento.isNotBlank())
 
-        // 2. Validar dosis
+
         assertTrue("La dosis es obligatoria", dosis.isNotBlank())
 
 
