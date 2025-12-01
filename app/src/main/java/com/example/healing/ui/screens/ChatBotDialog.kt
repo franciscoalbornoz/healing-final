@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState // Necesario para bajar el chat
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,11 +18,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow // <--- IMPORTANTE
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.healing.model.ChatViewModel
+import kotlinx.coroutines.delay // Necesario para la animación
 
 @Composable
 fun ChatBotDialog(
@@ -30,12 +32,25 @@ fun ChatBotDialog(
 ) {
     var text by remember { mutableStateOf("") }
 
+    // 1. Agregamos estado para controlar el scroll
+    val listState = rememberLazyListState()
+
     // Colores
     val bgDialog = Color(0xFFF5ECFF)
     val headerBg = Color(0xFFCA9BFF)
     val userBubble = Color(0xFF63918B)
     val aiBubble = Color(0xFF9C82D6)
     val inputBg = Color(0xFFE5D9FF)
+
+    // 2. Efecto para bajar automáticamente cuando se escribe
+    LaunchedEffect(viewModel.messages.size, viewModel.isTyping) {
+        if (viewModel.messages.isNotEmpty() || viewModel.isTyping) {
+            delay(100)
+            // Calculamos la posición del último elemento (incluyendo la burbuja si existe)
+            val index = viewModel.messages.size + (if (viewModel.isTyping) 1 else 0) - 1
+            if (index >= 0) listState.animateScrollToItem(index)
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -48,7 +63,7 @@ fun ChatBotDialog(
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
 
-                // ---------- HEADER CORREGIDO ----------
+                // HEADER (Este es el que ya tienes arreglado)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -75,9 +90,6 @@ fun ChatBotDialog(
 
                         Spacer(Modifier.width(8.dp))
 
-                        // 👇 AQUÍ ESTÁ EL ARREGLO
-                        // Usamos weight(1f) para que el texto ocupe el espacio disponible
-                        // sin empujar ni aplastar al botón de cerrar.
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Asistente Healing",
@@ -97,13 +109,10 @@ fun ChatBotDialog(
                             )
                         }
 
-                        // Espacio fijo pequeño antes del botón
                         Spacer(Modifier.width(4.dp))
 
-                        // Botón Cerrar: Se mantiene a su tamaño natural
                         TextButton(
                             onClick = onDismiss,
-                            // ContentPadding pequeño para que no ocupe tanto espacio extra
                             contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
                             Text(
@@ -117,8 +126,9 @@ fun ChatBotDialog(
                     }
                 }
 
-                // ---------- LISTA DE MENSAJES ----------
+                // LISTA DE MENSAJES
                 LazyColumn(
+                    state = listState, // Conectamos el scroll
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -132,9 +142,16 @@ fun ChatBotDialog(
                             aiColor = aiBubble
                         )
                     }
+
+                    // 3. AQUÍ APARECE LA BURBUJA SI ESTÁ PENSANDO
+                    if (viewModel.isTyping) {
+                        item {
+                            TypingBubble(aiColor = aiBubble)
+                        }
+                    }
                 }
 
-                // ---------- INPUT ----------
+                // INPUT
                 Surface(
                     tonalElevation = 2.dp,
                     shadowElevation = 4.dp,
@@ -155,13 +172,10 @@ fun ChatBotDialog(
                                 .clip(RoundedCornerShape(18.dp))
                                 .background(inputBg),
                             placeholder = {
-                                Text(
-                                    "Pregunta algo…",
-                                    fontSize = 13.sp,
-                                    color = Color.Gray
-                                )
+                                Text("Pregunta algo…", fontSize = 13.sp, color = Color.Gray)
                             },
                             singleLine = true,
+                            enabled = !viewModel.isTyping, // Bloqueamos si está escribiendo
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color.Transparent,
                                 unfocusedBorderColor = Color.Transparent,
@@ -178,10 +192,12 @@ fun ChatBotDialog(
                                     text = ""
                                 }
                             },
+                            enabled = !viewModel.isTyping, // Bloqueamos botón
                             shape = CircleShape,
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = headerBg,
-                                contentColor = Color.White
+                                contentColor = Color.White,
+                                disabledContainerColor = Color.Gray.copy(alpha = 0.5f)
                             )
                         ) {
                             Icon(
@@ -228,6 +244,52 @@ fun ChatBubble(
                 fontSize = 14.sp,
                 textAlign = TextAlign.Start
             )
+        }
+    }
+}
+
+// 4. COMPONENTE VISUAL DE LA BURBUJA ANIMADA
+@Composable
+fun TypingBubble(aiColor: Color) {
+    var dots by remember { mutableStateOf(".") }
+
+    // Animación infinita de puntos
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(400)
+            dots = when (dots) {
+                "." -> ".."
+                ".." -> "..."
+                else -> "."
+            }
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Surface(
+            color = aiColor.copy(alpha = 0.7f), // Un poco transparente
+            shape = RoundedCornerShape(
+                topStart = 16.dp, topEnd = 16.dp,
+                bottomEnd = 16.dp, bottomStart = 0.dp
+            ),
+            tonalElevation = 1.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Escribiendo$dots",
+                    color = Color(0xFF1E1230),
+                    fontSize = 12.sp,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
+            }
         }
     }
 }
