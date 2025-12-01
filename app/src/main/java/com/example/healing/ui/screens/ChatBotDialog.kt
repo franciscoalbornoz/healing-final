@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow // <--- IMPORTANTE
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -29,12 +30,11 @@ fun ChatBotDialog(
 ) {
     var text by remember { mutableStateOf("") }
 
-    // Colores en la línea del resto de la app
-    val bgDialog = Color(0xFFF5ECFF)         // fondo interior claro
-    val headerBg = Color(0xFFCA9BFF)         // barra superior lila
-    val titleColor = Color(0xFF2F143D)
-    val userBubble = Color(0xFF63918B)       // verde Healing
-    val aiBubble = Color(0xFF9C82D6)         // lila para el bot
+    // Colores
+    val bgDialog = Color(0xFFF5ECFF)
+    val headerBg = Color(0xFFCA9BFF)
+    val userBubble = Color(0xFF63918B)
+    val aiBubble = Color(0xFF9C82D6)
     val inputBg = Color(0xFFE5D9FF)
 
     Dialog(onDismissRequest = onDismiss) {
@@ -48,7 +48,7 @@ fun ChatBotDialog(
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
 
-                // ---------- HEADER ----------
+                // ---------- HEADER CORREGIDO ----------
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -75,28 +75,43 @@ fun ChatBotDialog(
 
                         Spacer(Modifier.width(8.dp))
 
-                        Column {
+                        // 👇 AQUÍ ESTÁ EL ARREGLO
+                        // Usamos weight(1f) para que el texto ocupe el espacio disponible
+                        // sin empujar ni aplastar al botón de cerrar.
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Asistente Healing",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = Color.White,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = "Consejos breves de salud y bienestar",
                                 fontSize = 11.sp,
-                                color = Color.White.copy(alpha = 0.85f)
+                                color = Color.White.copy(alpha = 0.85f),
+                                lineHeight = 12.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
-                        Spacer(Modifier.weight(1f))
+                        // Espacio fijo pequeño antes del botón
+                        Spacer(Modifier.width(4.dp))
 
-                        TextButton(onClick = onDismiss) {
+                        // Botón Cerrar: Se mantiene a su tamaño natural
+                        TextButton(
+                            onClick = onDismiss,
+                            // ContentPadding pequeño para que no ocupe tanto espacio extra
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
                             Text(
                                 "Cerrar",
                                 color = Color.White,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 12.sp
+                                fontSize = 12.sp,
+                                maxLines = 1
                             )
                         }
                     }
@@ -141,8 +156,9 @@ fun ChatBotDialog(
                                 .background(inputBg),
                             placeholder = {
                                 Text(
-                                    "Pregunta algo sobre salud o bienestar…",
-                                    fontSize = 13.sp
+                                    "Pregunta algo…",
+                                    fontSize = 13.sp,
+                                    color = Color.Gray
                                 )
                             },
                             singleLine = true,
